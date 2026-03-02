@@ -32,7 +32,7 @@ void setup() {
   // Initialize servo at middle position
   servo.attach(SERVO_PIN);
   servo.write(TEST_POS);
-  delay(500);
+  delay(1000);
 
   // Initialize sensor
   if (!vcnl.begin()) {
@@ -43,7 +43,7 @@ void setup() {
   Serial.println(F("VCNL4030 initialized"));
 
   vcnl.enablePS(true);
-  vcnl.setLEDCurrent(VCNL4030_LED_I_100MA);
+  vcnl.setLEDCurrent(VCNL4030_LED_I_200MA);
   delay(100);
 
   bool allPassed = true;
@@ -129,7 +129,7 @@ void setup() {
 
   // Cleanup
   servo.write(180);
-  delay(500);
+  delay(1000);
   servo.detach();
 
   // Results

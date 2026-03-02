@@ -46,7 +46,7 @@ void setup() {
   setAllPixels(0, 0, 0);
   servo.attach(SERVO_PIN);
   servo.write(FAR_POS); // Start far
-  delay(500);
+  delay(1000);
 
   // Initialize sensor
   if (!vcnl.begin()) {
@@ -58,7 +58,7 @@ void setup() {
 
   vcnl.enablePS(true);
   vcnl.enableALS(true);
-  vcnl.setLEDCurrent(VCNL4030_LED_I_100MA);
+  vcnl.setLEDCurrent(VCNL4030_LED_I_200MA);
   vcnl.setALSIntegrationTime(VCNL4030_ALS_IT_100MS);
   delay(200);
 
@@ -69,10 +69,10 @@ void setup() {
 
   // Get baseline readings
   servo.write(FAR_POS);
-  delay(500);
+  delay(1000);
   uint16_t psFar = vcnl.readProximity();
   servo.write(CLOSE_POS);
-  delay(500);
+  delay(1000);
   uint16_t psClose = vcnl.readProximity();
   Serial.print(F("  PS Far: "));
   Serial.print(psFar);
@@ -96,7 +96,7 @@ void setup() {
 
   // Move close to trigger CLOSE flag
   servo.write(CLOSE_POS);
-  delay(500);
+  delay(1000);
   vcnl.readProximity(); // Trigger reading
   delay(100);
   uint8_t flags = vcnl.readInterruptFlags();
@@ -108,7 +108,7 @@ void setup() {
 
   // Move far to trigger AWAY flag
   servo.write(FAR_POS);
-  delay(500);
+  delay(1000);
   vcnl.readProximity();
   delay(100);
   flags = vcnl.readInterruptFlags();
@@ -125,10 +125,10 @@ void setup() {
 
   // Get baseline readings
   setAllPixels(0, 0, 0);
-  delay(500);
+  delay(1000);
   uint16_t alsOff = vcnl.readALS();
   setAllPixels(255, 255, 255);
-  delay(500);
+  delay(1000);
   uint16_t alsOn = vcnl.readALS();
   Serial.print(F("  ALS Off: "));
   Serial.print(alsOff);
@@ -152,7 +152,7 @@ void setup() {
 
   // Turn on NeoPixels to trigger HIGH flag
   setAllPixels(255, 255, 255);
-  delay(500);
+  delay(1000);
   vcnl.readALS();
   delay(100);
   flags = vcnl.readInterruptFlags();
@@ -164,7 +164,7 @@ void setup() {
 
   // Turn off NeoPixels to trigger LOW flag
   setAllPixels(0, 0, 0);
-  delay(500);
+  delay(1000);
   vcnl.readALS();
   delay(100);
   flags = vcnl.readInterruptFlags();
@@ -177,7 +177,7 @@ void setup() {
   // Cleanup
   setAllPixels(0, 0, 0);
   servo.write(FAR_POS);
-  delay(500);
+  delay(1000);
   servo.detach();
 
   // Results

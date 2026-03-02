@@ -99,7 +99,7 @@ void setup() {
 
   // Cleanup
   servo.write(180);
-  delay(500);
+  delay(1000);
   servo.detach();
 
   // Results

@@ -56,7 +56,7 @@ void setup() {
   // Initialize servo at middle position
   servo.attach(SERVO_PIN);
   servo.write(TEST_POS);
-  delay(500);
+  delay(1000);
 
   // Initialize sensor
   if (!vcnl.begin()) {
@@ -75,7 +75,7 @@ void setup() {
   delay(100);
 
   // Test different currents
-  vcnl4030_led_i_t currents[] = {VCNL4030_LED_I_50MA, VCNL4030_LED_I_100MA,
+  vcnl4030_led_i_t currents[] = {VCNL4030_LED_I_200MA, VCNL4030_LED_I_200MA,
                                  VCNL4030_LED_I_200MA};
   const char* names[] = {"50mA", "100mA", "200mA"};
   uint16_t readings[3];
@@ -110,7 +110,7 @@ void setup() {
   // Reset
   vcnl.setLEDLowCurrent(false);
   servo.write(180);
-  delay(500);
+  delay(1000);
   servo.detach();
 
   // Results

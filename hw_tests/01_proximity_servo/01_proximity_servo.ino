@@ -62,13 +62,13 @@ void setup() {
   Serial.println(F("VCNL4030 initialized"));
 
   vcnl.enablePS(true);
-  vcnl.setLEDCurrent(VCNL4030_LED_I_100MA);
+  vcnl.setLEDCurrent(VCNL4030_LED_I_200MA);
   delay(200);
 
   // FAR: reflector away from sensor
   Serial.println(F("--- FAR (180 deg) ---"));
   servo.write(FAR_POS);
-  delay(500);
+  delay(1000);
   uint16_t psFar = medianProximity();
   Serial.print(F("  Proximity: "));
   Serial.println(psFar);
@@ -76,14 +76,14 @@ void setup() {
   // CLOSE: reflector over sensor
   Serial.println(F("--- CLOSE (90 deg) ---"));
   servo.write(CLOSE_POS);
-  delay(500);
+  delay(1000);
   uint16_t psClose = medianProximity();
   Serial.print(F("  Proximity: "));
   Serial.println(psClose);
 
   // Park far and detach
   servo.write(FAR_POS);
-  delay(500);
+  delay(1000);
   servo.detach();
 
   Serial.println();
