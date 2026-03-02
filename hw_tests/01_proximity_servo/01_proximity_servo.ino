@@ -1,11 +1,11 @@
 /*!
  * @file 01_proximity_servo.ino
- * @brief HW test: Verify proximity reads with servo-positioned reflector
+ * @brief HW test: Verify proximity responds to servo-positioned reflector
  *
  * Hardware setup:
  * - VCNL4030 sensor connected via I2C
  * - Servo on pin D4 with a reflective surface attached
- * - Servo parks at a fixed position to place target near sensor
+ * - 180 deg = reflector away, 90 deg = reflector over sensor
  */
 
 #include <Adafruit_VCNL4030.h>
@@ -13,7 +13,8 @@
 #include <Wire.h>
 
 #define SERVO_PIN 4
-#define TARGET_POS 130
+#define FAR_POS 180
+#define CLOSE_POS 90
 
 Adafruit_VCNL4030 vcnl;
 Servo servo;
@@ -48,13 +49,10 @@ void setup() {
     delay(10);
 
   Serial.println(F("=== 01_proximity_servo ==="));
-  Serial.println(F("Verify proximity with servo-parked reflector"));
+  Serial.println(F("Verify proximity with servo-positioned reflector"));
   Serial.println();
 
-  // Park servo and let it settle
   servo.attach(SERVO_PIN);
-  servo.write(TARGET_POS);
-  delay(1500);
 
   if (!vcnl.begin()) {
     Serial.println(F("ERROR: VCNL4030 not found!"));
@@ -67,48 +65,39 @@ void setup() {
   vcnl.setLEDCurrent(VCNL4030_LED_I_100MA);
   delay(200);
 
-  // Take 5 readings to show stability
-  Serial.println(F("--- Proximity readings (5x) ---"));
-  uint16_t total = 0;
-  for (uint8_t i = 0; i < 5; i++) {
-    uint16_t ps = medianProximity();
-    Serial.print(F("  Reading "));
-    Serial.print(i + 1);
-    Serial.print(F(": "));
-    Serial.println(ps);
-    total += ps;
-    delay(100);
-  }
-  uint16_t avg = total / 5;
-  Serial.print(F("  Average: "));
-  Serial.println(avg);
-
-  // Detach servo to stop jitter
-  servo.detach();
-
-  // Take 5 more readings with servo detached
-  Serial.println(F("--- After servo detach (5x) ---"));
+  // FAR: reflector away from sensor
+  Serial.println(F("--- FAR (180 deg) ---"));
+  servo.write(FAR_POS);
   delay(500);
-  total = 0;
-  for (uint8_t i = 0; i < 5; i++) {
-    uint16_t ps = medianProximity();
-    Serial.print(F("  Reading "));
-    Serial.print(i + 1);
-    Serial.print(F(": "));
-    Serial.println(ps);
-    total += ps;
-    delay(100);
-  }
-  uint16_t avgDetached = total / 5;
-  Serial.print(F("  Average: "));
-  Serial.println(avgDetached);
+  uint16_t psFar = medianProximity();
+  Serial.print(F("  Proximity: "));
+  Serial.println(psFar);
+
+  // CLOSE: reflector over sensor
+  Serial.println(F("--- CLOSE (90 deg) ---"));
+  servo.write(CLOSE_POS);
+  delay(500);
+  uint16_t psClose = medianProximity();
+  Serial.print(F("  Proximity: "));
+  Serial.println(psClose);
+
+  // Park far and detach
+  servo.write(FAR_POS);
+  delay(500);
+  servo.detach();
 
   Serial.println();
   Serial.println(F("========================="));
-  if (avgDetached > 30) {
-    Serial.println(F("PASS: Proximity detecting target"));
+  Serial.print(F("  Far: "));
+  Serial.print(psFar);
+  Serial.print(F("  Close: "));
+  Serial.print(psClose);
+  Serial.print(F("  Diff: "));
+  Serial.println((int16_t)(psClose - psFar));
+  if (psClose > psFar + 50) {
+    Serial.println(F("PASS: Close reading significantly higher than far"));
   } else {
-    Serial.println(F("FAIL: Proximity too low, target not detected"));
+    Serial.println(F("FAIL: Close reading not significantly higher"));
   }
 }
 

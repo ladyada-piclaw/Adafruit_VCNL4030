@@ -155,8 +155,8 @@ void setup() {
 
   // Cleanup
   vcnl.enableSunlightCancellation(false);
-  servo.write(150);
-  delay(300);
+  servo.write(180);
+  delay(500);
   servo.detach();
 
   // Results

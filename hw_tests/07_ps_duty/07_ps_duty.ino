@@ -15,7 +15,7 @@
 
 #define SERVO_PIN 4
 #define TEST_POS 110 // Peak signal position for testing
-#define FAR_POS 150  // Safe return position
+#define FAR_POS 180  // Safe return position
 
 Adafruit_VCNL4030 vcnl;
 Servo servo;
@@ -89,8 +89,8 @@ void setup() {
   }
 
   // Cleanup
-  servo.write(150);
-  delay(300);
+  servo.write(180);
+  delay(500);
   servo.detach();
 
   // Results

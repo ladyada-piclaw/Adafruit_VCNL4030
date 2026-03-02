@@ -18,8 +18,8 @@
 #define NEOPIXEL_PIN 6
 #define NEOPIXEL_COUNT 16
 #define SERVO_PIN 4
-#define FAR_POS 150   // Reliable baseline position
-#define CLOSE_POS 130 // Reliable high-reading position
+#define FAR_POS 180  // Reliable baseline position
+#define CLOSE_POS 90 // Reliable high-reading position
 
 Adafruit_VCNL4030 vcnl;
 Adafruit_NeoPixel pixels(NEOPIXEL_COUNT, NEOPIXEL_PIN, NEO_GRB + NEO_KHZ800);
@@ -96,7 +96,7 @@ void setup() {
 
   // Move close to trigger CLOSE flag
   servo.write(CLOSE_POS);
-  delay(300);
+  delay(500);
   vcnl.readProximity(); // Trigger reading
   delay(100);
   uint8_t flags = vcnl.readInterruptFlags();
@@ -108,7 +108,7 @@ void setup() {
 
   // Move far to trigger AWAY flag
   servo.write(FAR_POS);
-  delay(300);
+  delay(500);
   vcnl.readProximity();
   delay(100);
   flags = vcnl.readInterruptFlags();
@@ -125,10 +125,10 @@ void setup() {
 
   // Get baseline readings
   setAllPixels(0, 0, 0);
-  delay(300);
+  delay(500);
   uint16_t alsOff = vcnl.readALS();
   setAllPixels(255, 255, 255);
-  delay(300);
+  delay(500);
   uint16_t alsOn = vcnl.readALS();
   Serial.print(F("  ALS Off: "));
   Serial.print(alsOff);
@@ -152,7 +152,7 @@ void setup() {
 
   // Turn on NeoPixels to trigger HIGH flag
   setAllPixels(255, 255, 255);
-  delay(300);
+  delay(500);
   vcnl.readALS();
   delay(100);
   flags = vcnl.readInterruptFlags();
@@ -164,7 +164,7 @@ void setup() {
 
   // Turn off NeoPixels to trigger LOW flag
   setAllPixels(0, 0, 0);
-  delay(300);
+  delay(500);
   vcnl.readALS();
   delay(100);
   flags = vcnl.readInterruptFlags();
@@ -177,7 +177,7 @@ void setup() {
   // Cleanup
   setAllPixels(0, 0, 0);
   servo.write(FAR_POS);
-  delay(300);
+  delay(500);
   servo.detach();
 
   // Results
