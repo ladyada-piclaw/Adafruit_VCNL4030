@@ -14,7 +14,8 @@
 #include <Wire.h>
 
 #define SERVO_PIN 4
-#define CLOSE_POS 60
+#define CLOSE_POS 60 // Reliable high-reading position
+#define FAR_POS 150  // Safe return position
 
 Adafruit_VCNL4030 vcnl;
 Servo servo;

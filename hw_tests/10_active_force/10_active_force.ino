@@ -14,7 +14,8 @@
 #include <Wire.h>
 
 #define SERVO_PIN 4
-#define MID_POS 90
+#define TEST_POS 90 // Peak signal position for testing
+#define FAR_POS 150 // Safe return position
 
 Adafruit_VCNL4030 vcnl;
 Servo servo;
@@ -30,7 +31,7 @@ void setup() {
 
   // Initialize servo at middle position
   servo.attach(SERVO_PIN);
-  servo.write(MID_POS);
+  servo.write(TEST_POS);
   delay(500);
 
   // Initialize sensor

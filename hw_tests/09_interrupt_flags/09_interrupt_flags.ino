@@ -18,6 +18,8 @@
 #define NEOPIXEL_PIN 6
 #define NEOPIXEL_COUNT 16
 #define SERVO_PIN 4
+#define FAR_POS 150  // Reliable baseline position
+#define CLOSE_POS 60 // Reliable high-reading position
 
 Adafruit_VCNL4030 vcnl;
 Adafruit_NeoPixel pixels(NEOPIXEL_COUNT, NEOPIXEL_PIN, NEO_GRB + NEO_KHZ800);
@@ -43,7 +45,7 @@ void setup() {
   pixels.begin();
   setAllPixels(0, 0, 0);
   servo.attach(SERVO_PIN);
-  servo.write(150); // Start far
+  servo.write(FAR_POS); // Start far
   delay(500);
 
   // Initialize sensor
@@ -66,10 +68,10 @@ void setup() {
   Serial.println(F("--- PS Interrupt Test ---"));
 
   // Get baseline readings
-  servo.write(150);
+  servo.write(FAR_POS);
   delay(500);
   uint16_t psFar = vcnl.readProximity();
-  servo.write(60);
+  servo.write(CLOSE_POS);
   delay(500);
   uint16_t psClose = vcnl.readProximity();
   Serial.print(F("  PS Far: "));
@@ -93,7 +95,7 @@ void setup() {
   vcnl.readInterruptFlags();
 
   // Move close to trigger CLOSE flag
-  servo.write(60);
+  servo.write(CLOSE_POS);
   delay(300);
   vcnl.readProximity(); // Trigger reading
   delay(100);
@@ -105,7 +107,7 @@ void setup() {
     allPassed = false;
 
   // Move far to trigger AWAY flag
-  servo.write(150);
+  servo.write(FAR_POS);
   delay(300);
   vcnl.readProximity();
   delay(100);
@@ -174,7 +176,7 @@ void setup() {
 
   // Cleanup
   setAllPixels(0, 0, 0);
-  servo.write(150);
+  servo.write(FAR_POS);
   delay(300);
   servo.detach();
 
