@@ -96,9 +96,10 @@ typedef enum {
 
 /** PS gain settings */
 typedef enum {
-  VCNL4030_PS_GAIN_TWO_STEP = 0b00,  ///< Two-step mode
-  VCNL4030_PS_GAIN_SINGLE_8X = 0b10, ///< Single mode x8
-  VCNL4030_PS_GAIN_SINGLE_1X = 0b11, ///< Single mode x1
+  VCNL4030_PS_GAIN_TWO_STEP =
+      0b00, ///< Two-step mode (most sensitive, ~4x single)
+  VCNL4030_PS_GAIN_SINGLE_8X = 0b10, ///< Single mode x8 range (least sensitive)
+  VCNL4030_PS_GAIN_SINGLE_1X = 0b11, ///< Single mode x1 range
 } vcnl4030_ps_gain_t;
 
 /** PS interrupt mode settings */

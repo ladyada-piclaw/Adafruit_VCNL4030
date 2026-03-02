@@ -1,12 +1,10 @@
 /*!
- * @file test_ps_gain.ino
- * @brief HW test: Verify PS gain settings affect proximity readings
+ * @file 05_ps_gain.ino
+ * @brief HW test: Verify PS gain modes affect sensitivity
  *
- * Hardware setup:
- * - VCNL4030 sensor connected via I2C
- * - Servo on pin D4 at fixed position
- *
- * Test: Higher gain should give higher proximity counts
+ * Gain modes (most to least sensitive):
+ *   TWO_STEP > SINGLE_1X > SINGLE_8X
+ * The "8X" means 8x extended range, NOT 8x more gain.
  */
 
 #include <Adafruit_VCNL4030.h>
@@ -14,34 +12,17 @@
 #include <Wire.h>
 
 #define SERVO_PIN 4
-#define TEST_POS 110 // Peak signal position for testing
-#define FAR_POS 180  // Safe return position
+#define CLOSE_POS 90
 
 Adafruit_VCNL4030 vcnl;
 Servo servo;
 
-uint16_t medianProximity() {
-  uint16_t readings[3];
-  for (uint8_t i = 0; i < 3; i++) {
-    readings[i] = vcnl.readProximity();
-    delay(50);
-  }
-  if (readings[0] > readings[1]) {
-    uint16_t t = readings[0];
-    readings[0] = readings[1];
-    readings[1] = t;
-  }
-  if (readings[1] > readings[2]) {
-    uint16_t t = readings[1];
-    readings[1] = readings[2];
-    readings[2] = t;
-  }
-  if (readings[0] > readings[1]) {
-    uint16_t t = readings[0];
-    readings[0] = readings[1];
-    readings[1] = t;
-  }
-  return readings[1];
+uint16_t readGain(vcnl4030_ps_gain_t gain) {
+  vcnl.setPSGain(gain);
+  delay(200);
+  vcnl.readProximity();
+  delay(50);
+  return vcnl.readProximity();
 }
 
 void setup() {
@@ -49,16 +30,15 @@ void setup() {
   while (!Serial)
     delay(10);
 
-  Serial.println(F("=== test_ps_gain ==="));
-  Serial.println(F("Testing proximity at different gain settings"));
+  Serial.println(F("=== 05_ps_gain ==="));
+  Serial.println(F("Testing PS gain modes"));
   Serial.println();
 
-  // Initialize servo at middle position
   servo.attach(SERVO_PIN);
-  servo.write(TEST_POS);
+  servo.write(CLOSE_POS);
   delay(1000);
+  servo.detach();
 
-  // Initialize sensor
   if (!vcnl.begin()) {
     Serial.println(F("ERROR: VCNL4030 not found!"));
     while (1)
@@ -68,53 +48,39 @@ void setup() {
 
   vcnl.enablePS(true);
   vcnl.setLEDCurrent(VCNL4030_LED_I_200MA);
-  delay(100);
+  delay(200);
 
-  // Test each gain setting
-  Serial.println(F("Gain setting vs proximity:"));
+  uint16_t twoStep = readGain(VCNL4030_PS_GAIN_TWO_STEP);
+  uint16_t single1x = readGain(VCNL4030_PS_GAIN_SINGLE_1X);
+  uint16_t single8x = readGain(VCNL4030_PS_GAIN_SINGLE_8X);
 
-  vcnl.setPSGain(VCNL4030_PS_GAIN_SINGLE_1X);
-  delay(100);
-  uint16_t ps1x = medianProximity();
-  Serial.print(F("  SINGLE_1X: "));
-  Serial.println(ps1x);
-
-  vcnl.setPSGain(VCNL4030_PS_GAIN_SINGLE_8X);
-  delay(100);
-  uint16_t ps8x = medianProximity();
-  Serial.print(F("  SINGLE_8X: "));
-  Serial.println(ps8x);
-
-  vcnl.setPSGain(VCNL4030_PS_GAIN_TWO_STEP);
-  delay(100);
-  uint16_t psTwoStep = medianProximity();
+  Serial.println(F("Gain mode vs proximity (most to least sensitive):"));
   Serial.print(F("  TWO_STEP:  "));
-  Serial.println(psTwoStep);
+  Serial.println(twoStep);
+  Serial.print(F("  SINGLE_1X: "));
+  Serial.println(single1x);
+  Serial.print(F("  SINGLE_8X: "));
+  Serial.println(single8x);
 
-  // Cleanup
-  servo.write(180);
-  delay(1000);
-  servo.detach();
-
-  // Results
   Serial.println();
   Serial.println(F("========================="));
 
-  // 8X gain should give higher counts than 1X
-  if (ps8x > ps1x) {
-    Serial.println(F("PASS: 8X gain higher than 1X gain"));
+  bool pass = true;
+  if (twoStep > single1x) {
+    Serial.println(F("PASS: TWO_STEP > SINGLE_1X"));
   } else {
-    Serial.println(F("FAIL: 8X gain not higher than 1X (may be saturated)"));
+    Serial.println(F("FAIL: TWO_STEP should be > SINGLE_1X"));
+    pass = false;
   }
-
-  // All readings should be valid (non-zero with object present)
-  if (ps1x > 0 && ps8x > 0 && psTwoStep > 0) {
-    Serial.println(F("PASS: All gain modes return valid readings"));
+  if (single1x > single8x) {
+    Serial.println(F("PASS: SINGLE_1X > SINGLE_8X"));
   } else {
-    Serial.println(F("FAIL: Some gain modes returned zero"));
+    Serial.println(F("FAIL: SINGLE_1X should be > SINGLE_8X"));
+    pass = false;
+  }
+  if (pass) {
+    Serial.println(F("ALL TESTS PASSED"));
   }
 }
 
-void loop() {
-  // Nothing to do
-}
+void loop() {}
