@@ -34,9 +34,6 @@ void loop() {
   uint16_t als = vcnl.readALS();
   uint16_t white = vcnl.readWhite();
 
-  if (prox == 0xFFFF || als == 0xFFFF || white == 0xFFFF)
-    return;
-
   Serial.print(F("Proximity: "));
   Serial.print(prox);
   Serial.print(F("  Lux: "));
