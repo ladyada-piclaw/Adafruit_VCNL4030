@@ -58,9 +58,16 @@ void setup() {
   Serial.print(F("  Threshold: "));
   Serial.println(threshold);
 
-  // Set up proximity interrupt for close detection
-  vcnl.setProxLowThreshold(0);
+  // Set up proximity interrupt for close/away detection
+  // IMPORTANT: Interrupts fire on TRANSITIONS. The sensor must be below
+  // the low threshold (far state) before it can trigger CLOSE by crossing
+  // above the high threshold. Set low threshold above ambient so the
+  // sensor starts in the "far" state.
+  uint16_t lowThreshold = (ambient + threshold) / 2; // midpoint
+  vcnl.setProxLowThreshold(lowThreshold);
   vcnl.setProxHighThreshold(threshold);
+  Serial.print(F("Low threshold: "));
+  Serial.println(lowThreshold);
   vcnl.setProxPersistence(VCNL4030_PROX_PERS_1);
   vcnl.setProxInterruptMode(VCNL4030_PROX_INT_BOTH);
 
@@ -74,19 +81,19 @@ void setup() {
 }
 
 void loop() {
+  Serial.print(F("Prox: "));
+  Serial.print(vcnl.readProximity());
+
   if (intFired) {
     intFired = false;
-    uint16_t prox = vcnl.readProximity();
     uint8_t flags = vcnl.readInterruptFlags();
 
-    Serial.print(F("INT! Prox: "));
-    Serial.print(prox);
-
     if (flags & VCNL4030_PROX_IF_CLOSE)
-      Serial.print(F("  -> CLOSE"));
+      Serial.print(F("  *** IRQ CLOSE ***"));
     if (flags & VCNL4030_PROX_IF_AWAY)
-      Serial.print(F("  -> AWAY"));
-
-    Serial.println();
+      Serial.print(F("  *** IRQ AWAY ***"));
   }
+
+  Serial.println();
+  delay(100);
 }
