@@ -21,11 +21,11 @@ Adafruit_VCNL4030 vcnl;
 Servo servo;
 
 // Enum for medianRead helper
-enum read_type_t { READ_PROX, READ_ALS, READ_WHITE };
+enum read_type_t { READ_PROX, READ_ALS, READ_WHITE, READ_LUX };
 
 // Forward declarations
-uint16_t medianRead(Adafruit_VCNL4030& vcnl, read_type_t type, uint8_t n = 3,
-                    uint16_t delayMs = 50);
+float medianRead(Adafruit_VCNL4030& vcnl, read_type_t type, uint8_t n = 3,
+                 uint16_t delayMs = 50);
 
 void setup() {
   Serial.begin(115200);
@@ -119,8 +119,8 @@ void loop() {
 
 // ============ Helper functions ============
 
-uint16_t medianRead(Adafruit_VCNL4030& vcnl, read_type_t type, uint8_t n = 3,
-                    uint16_t delayMs = 50) {
+float medianRead(Adafruit_VCNL4030& vcnl, read_type_t type, uint8_t n = 3,
+                 uint16_t delayMs = 50) {
   uint16_t readings[9];
   if (n > 9)
     n = 9;

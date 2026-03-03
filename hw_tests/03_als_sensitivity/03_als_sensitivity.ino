@@ -20,12 +20,11 @@ Adafruit_VCNL4030 vcnl;
 Adafruit_NeoPixel pixels(NEOPIXEL_COUNT, NEOPIXEL_PIN, NEO_GRB + NEO_KHZ800);
 
 // Enum for medianRead helper
-enum read_type_t { READ_PROX, READ_ALS, READ_WHITE };
+enum read_type_t { READ_PROX, READ_ALS, READ_WHITE, READ_LUX };
 
 // Forward declarations
-uint16_t medianRead(Adafruit_VCNL4030& vcnl, read_type_t type, uint8_t n = 3,
-                    uint16_t delayMs = 50);
-float medianLux(Adafruit_VCNL4030& vcnl, uint8_t n = 3, uint16_t delayMs = 50);
+float medianRead(Adafruit_VCNL4030& vcnl, read_type_t type, uint8_t n = 3,
+                 uint16_t delayMs = 50);
 void setAllPixels(uint8_t r, uint8_t g, uint8_t b);
 
 void setup() {
@@ -58,8 +57,8 @@ void setup() {
   vcnl.setALSHighDynamicRange(false);
   vcnl.setALSLowSensitivity(false);
   delay(200);
-  uint16_t raw1 = medianRead(vcnl, READ_ALS);
-  float lux1 = medianLux(vcnl);
+  uint16_t raw1 = (uint16_t)medianRead(vcnl, READ_ALS);
+  float lux1 = medianRead(vcnl, READ_LUX);
   Serial.print(F("  Raw: "));
   Serial.print(raw1);
   Serial.print(F("  Lux: "));
@@ -70,8 +69,8 @@ void setup() {
   vcnl.setALSHighDynamicRange(true);
   vcnl.setALSLowSensitivity(false);
   delay(200);
-  uint16_t raw2 = medianRead(vcnl, READ_ALS);
-  float lux2 = medianLux(vcnl);
+  uint16_t raw2 = (uint16_t)medianRead(vcnl, READ_ALS);
+  float lux2 = medianRead(vcnl, READ_LUX);
   Serial.print(F("  Raw: "));
   Serial.print(raw2);
   Serial.print(F("  Lux: "));
@@ -82,8 +81,8 @@ void setup() {
   vcnl.setALSHighDynamicRange(false);
   vcnl.setALSLowSensitivity(true);
   delay(200);
-  uint16_t raw3 = medianRead(vcnl, READ_ALS);
-  float lux3 = medianLux(vcnl);
+  uint16_t raw3 = (uint16_t)medianRead(vcnl, READ_ALS);
+  float lux3 = medianRead(vcnl, READ_LUX);
   Serial.print(F("  Raw: "));
   Serial.print(raw3);
   Serial.print(F("  Lux: "));
@@ -137,8 +136,8 @@ void setAllPixels(uint8_t r, uint8_t g, uint8_t b) {
   pixels.show();
 }
 
-uint16_t medianRead(Adafruit_VCNL4030& vcnl, read_type_t type, uint8_t n = 3,
-                    uint16_t delayMs = 50) {
+float medianRead(Adafruit_VCNL4030& vcnl, read_type_t type, uint8_t n = 3,
+                 uint16_t delayMs = 50) {
   uint16_t readings[9];
   if (n > 9)
     n = 9;
@@ -161,29 +160,6 @@ uint16_t medianRead(Adafruit_VCNL4030& vcnl, read_type_t type, uint8_t n = 3,
   }
   for (uint8_t i = 1; i < n; i++) {
     uint16_t key = readings[i];
-    int8_t j = i - 1;
-    while (j >= 0 && readings[j] > key) {
-      readings[j + 1] = readings[j];
-      j--;
-    }
-    readings[j + 1] = key;
-  }
-  return readings[n / 2];
-}
-
-float medianLux(Adafruit_VCNL4030& vcnl, uint8_t n = 3, uint16_t delayMs = 50) {
-  float readings[9];
-  if (n > 9)
-    n = 9;
-  if (n < 1)
-    n = 1;
-  for (uint8_t i = 0; i < n; i++) {
-    readings[i] = vcnl.readLux();
-    if (i < n - 1)
-      delay(delayMs);
-  }
-  for (uint8_t i = 1; i < n; i++) {
-    float key = readings[i];
     int8_t j = i - 1;
     while (j >= 0 && readings[j] > key) {
       readings[j + 1] = readings[j];

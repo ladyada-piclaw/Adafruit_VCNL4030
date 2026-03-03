@@ -20,11 +20,11 @@ Adafruit_VCNL4030 vcnl;
 Servo servo;
 
 // Enum for medianRead helper
-enum read_type_t { READ_PROX, READ_ALS, READ_WHITE };
+enum read_type_t { READ_PROX, READ_ALS, READ_WHITE, READ_LUX };
 
 // Forward declarations
-uint16_t medianRead(Adafruit_VCNL4030& vcnl, read_type_t type, uint8_t n = 3,
-                    uint16_t delayMs = 50);
+float medianRead(Adafruit_VCNL4030& vcnl, read_type_t type, uint8_t n = 3,
+                 uint16_t delayMs = 50);
 
 void setup() {
   Serial.begin(115200);
@@ -52,7 +52,7 @@ void setup() {
   Serial.println(F("--- FAR (180 deg) ---"));
   servo.write(FAR_POS);
   delay(1000);
-  uint16_t psFar = medianRead(vcnl, READ_PROX);
+  uint16_t psFar = (uint16_t)medianRead(vcnl, READ_PROX);
   Serial.print(F("  Proximity: "));
   Serial.println(psFar);
 
@@ -60,7 +60,7 @@ void setup() {
   Serial.println(F("--- CLOSE (90 deg) ---"));
   servo.write(CLOSE_POS);
   delay(1000);
-  uint16_t psClose = medianRead(vcnl, READ_PROX);
+  uint16_t psClose = (uint16_t)medianRead(vcnl, READ_PROX);
   Serial.print(F("  Proximity: "));
   Serial.println(psClose);
 
@@ -88,8 +88,8 @@ void loop() {}
 
 // ============ Helper functions ============
 
-uint16_t medianRead(Adafruit_VCNL4030& vcnl, read_type_t type, uint8_t n = 3,
-                    uint16_t delayMs = 50) {
+float medianRead(Adafruit_VCNL4030& vcnl, read_type_t type, uint8_t n = 3,
+                 uint16_t delayMs = 50) {
   uint16_t readings[9];
   if (n > 9)
     n = 9;

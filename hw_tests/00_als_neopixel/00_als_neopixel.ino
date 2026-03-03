@@ -20,12 +20,11 @@ Adafruit_VCNL4030 vcnl;
 Adafruit_NeoPixel pixels(NEOPIXEL_COUNT, NEOPIXEL_PIN, NEO_GRB + NEO_KHZ800);
 
 // Enum for medianRead helper
-enum read_type_t { READ_PROX, READ_ALS, READ_WHITE };
+enum read_type_t { READ_PROX, READ_ALS, READ_WHITE, READ_LUX };
 
 // Forward declarations
-uint16_t medianRead(Adafruit_VCNL4030& vcnl, read_type_t type, uint8_t n = 3,
-                    uint16_t delayMs = 50);
-float medianLux(Adafruit_VCNL4030& vcnl, uint8_t n = 3, uint16_t delayMs = 50);
+float medianRead(Adafruit_VCNL4030& vcnl, read_type_t type, uint8_t n = 3,
+                 uint16_t delayMs = 50);
 void setAllPixels(uint8_t r, uint8_t g, uint8_t b);
 
 void setup() {
@@ -61,13 +60,13 @@ void setup() {
   Serial.println(F("--- Test 1: ALS raw value ---"));
   setAllPixels(0, 0, 0);
   delay(300);
-  uint16_t alsOff = medianRead(vcnl, READ_ALS);
+  uint16_t alsOff = (uint16_t)medianRead(vcnl, READ_ALS);
   Serial.print(F("  ALS OFF: "));
   Serial.println(alsOff);
 
   setAllPixels(255, 255, 255);
   delay(300);
-  uint16_t alsOn = medianRead(vcnl, READ_ALS);
+  uint16_t alsOn = (uint16_t)medianRead(vcnl, READ_ALS);
   Serial.print(F("  ALS ON:  "));
   Serial.println(alsOn);
 
@@ -83,13 +82,13 @@ void setup() {
   Serial.println(F("--- Test 2: Lux calculation ---"));
   setAllPixels(0, 0, 0);
   delay(300);
-  float luxOff = medianLux(vcnl);
+  float luxOff = medianRead(vcnl, READ_LUX);
   Serial.print(F("  Lux OFF: "));
   Serial.println(luxOff, 2);
 
   setAllPixels(255, 255, 255);
   delay(300);
-  float luxOn = medianLux(vcnl);
+  float luxOn = medianRead(vcnl, READ_LUX);
   Serial.print(F("  Lux ON:  "));
   Serial.println(luxOn, 2);
 
@@ -105,13 +104,13 @@ void setup() {
   Serial.println(F("--- Test 3: White channel ---"));
   setAllPixels(0, 0, 0);
   delay(300);
-  uint16_t whiteOff = medianRead(vcnl, READ_WHITE);
+  uint16_t whiteOff = (uint16_t)medianRead(vcnl, READ_WHITE);
   Serial.print(F("  White OFF: "));
   Serial.println(whiteOff);
 
   setAllPixels(255, 255, 255);
   delay(300);
-  uint16_t whiteOn = medianRead(vcnl, READ_WHITE);
+  uint16_t whiteOn = (uint16_t)medianRead(vcnl, READ_WHITE);
   Serial.print(F("  White ON:  "));
   Serial.println(whiteOn);
 
@@ -148,8 +147,8 @@ void setAllPixels(uint8_t r, uint8_t g, uint8_t b) {
   pixels.show();
 }
 
-uint16_t medianRead(Adafruit_VCNL4030& vcnl, read_type_t type, uint8_t n = 3,
-                    uint16_t delayMs = 50) {
+float medianRead(Adafruit_VCNL4030& vcnl, read_type_t type, uint8_t n = 3,
+                 uint16_t delayMs = 50) {
   uint16_t readings[9];
   if (n > 9)
     n = 9;
@@ -172,29 +171,6 @@ uint16_t medianRead(Adafruit_VCNL4030& vcnl, read_type_t type, uint8_t n = 3,
   }
   for (uint8_t i = 1; i < n; i++) {
     uint16_t key = readings[i];
-    int8_t j = i - 1;
-    while (j >= 0 && readings[j] > key) {
-      readings[j + 1] = readings[j];
-      j--;
-    }
-    readings[j + 1] = key;
-  }
-  return readings[n / 2];
-}
-
-float medianLux(Adafruit_VCNL4030& vcnl, uint8_t n = 3, uint16_t delayMs = 50) {
-  float readings[9];
-  if (n > 9)
-    n = 9;
-  if (n < 1)
-    n = 1;
-  for (uint8_t i = 0; i < n; i++) {
-    readings[i] = vcnl.readLux();
-    if (i < n - 1)
-      delay(delayMs);
-  }
-  for (uint8_t i = 1; i < n; i++) {
-    float key = readings[i];
     int8_t j = i - 1;
     while (j >= 0 && readings[j] > key) {
       readings[j + 1] = readings[j];

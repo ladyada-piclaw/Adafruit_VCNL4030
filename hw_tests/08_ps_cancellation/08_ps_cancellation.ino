@@ -21,11 +21,11 @@ Adafruit_VCNL4030 vcnl;
 Servo servo;
 
 // Enum for medianRead helper
-enum read_type_t { READ_PROX, READ_ALS, READ_WHITE };
+enum read_type_t { READ_PROX, READ_ALS, READ_WHITE, READ_LUX };
 
 // Forward declarations
-uint16_t medianRead(Adafruit_VCNL4030& vcnl, read_type_t type, uint8_t n = 3,
-                    uint16_t delayMs = 50);
+float medianRead(Adafruit_VCNL4030& vcnl, read_type_t type, uint8_t n = 3,
+                 uint16_t delayMs = 50);
 
 void setup() {
   Serial.begin(115200);
@@ -56,7 +56,7 @@ void setup() {
 
   // Read baseline with no cancellation
   Serial.println(F("--- No cancellation ---"));
-  uint16_t baseline = medianRead(vcnl, READ_PROX);
+  uint16_t baseline = (uint16_t)medianRead(vcnl, READ_PROX);
   Serial.print(F("  Baseline reading: "));
   Serial.println(baseline);
 
@@ -68,7 +68,7 @@ void setup() {
   vcnl.setProxCancellation(cancelVal);
   delay(100);
 
-  uint16_t cancelled = medianRead(vcnl, READ_PROX);
+  uint16_t cancelled = (uint16_t)medianRead(vcnl, READ_PROX);
   Serial.print(F("  Cancelled reading: "));
   Serial.println(cancelled);
 
@@ -115,8 +115,8 @@ void loop() {
 
 // ============ Helper functions ============
 
-uint16_t medianRead(Adafruit_VCNL4030& vcnl, read_type_t type, uint8_t n = 3,
-                    uint16_t delayMs = 50) {
+float medianRead(Adafruit_VCNL4030& vcnl, read_type_t type, uint8_t n = 3,
+                 uint16_t delayMs = 50) {
   uint16_t readings[9];
   if (n > 9)
     n = 9;
