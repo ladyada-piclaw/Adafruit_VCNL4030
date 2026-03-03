@@ -13,20 +13,19 @@
 #include <Adafruit_VCNL4030.h>
 #include <Wire.h>
 
-#include "hw_test_helpers.h"
-
 #define NEOPIXEL_PIN 6
 #define NEOPIXEL_COUNT 16
 
 Adafruit_VCNL4030 vcnl;
 Adafruit_NeoPixel pixels(NEOPIXEL_COUNT, NEOPIXEL_PIN, NEO_GRB + NEO_KHZ800);
 
-void setAllPixels(uint8_t r, uint8_t g, uint8_t b) {
-  for (int i = 0; i < NEOPIXEL_COUNT; i++) {
-    pixels.setPixelColor(i, pixels.Color(r, g, b));
-  }
-  pixels.show();
-}
+// Enum for medianRead helper
+enum read_type_t { READ_PROX, READ_ALS, READ_WHITE };
+
+// Forward declarations
+uint16_t medianRead(Adafruit_VCNL4030& vcnl, read_type_t type, uint8_t n = 3,
+                    uint16_t delayMs = 50);
+void setAllPixels(uint8_t r, uint8_t g, uint8_t b);
 
 void setup() {
   Serial.begin(115200);
@@ -96,4 +95,47 @@ void setup() {
 
 void loop() {
   // Nothing to do
+}
+
+// ============ Helper functions ============
+
+void setAllPixels(uint8_t r, uint8_t g, uint8_t b) {
+  for (int i = 0; i < NEOPIXEL_COUNT; i++) {
+    pixels.setPixelColor(i, pixels.Color(r, g, b));
+  }
+  pixels.show();
+}
+
+uint16_t medianRead(Adafruit_VCNL4030& vcnl, read_type_t type, uint8_t n = 3,
+                    uint16_t delayMs = 50) {
+  uint16_t readings[9];
+  if (n > 9)
+    n = 9;
+  if (n < 1)
+    n = 1;
+  for (uint8_t i = 0; i < n; i++) {
+    switch (type) {
+      case READ_PROX:
+        readings[i] = vcnl.readProximity();
+        break;
+      case READ_ALS:
+        readings[i] = vcnl.readALS();
+        break;
+      case READ_WHITE:
+        readings[i] = vcnl.readWhite();
+        break;
+    }
+    if (i < n - 1)
+      delay(delayMs);
+  }
+  for (uint8_t i = 1; i < n; i++) {
+    uint16_t key = readings[i];
+    int8_t j = i - 1;
+    while (j >= 0 && readings[j] > key) {
+      readings[j + 1] = readings[j];
+      j--;
+    }
+    readings[j + 1] = key;
+  }
+  return readings[n / 2];
 }
