@@ -308,9 +308,6 @@ void loop() {
   uint16_t als = vcnl.readALS();
   uint16_t white = vcnl.readWhite();
 
-  if (prox == 0xFFFF || als == 0xFFFF || white == 0xFFFF)
-    return;
-
   Serial.print(F("Prox: "));
   Serial.print(prox);
 
@@ -339,5 +336,5 @@ void loop() {
   }
 
   Serial.println();
-  delay(500);
+  delay(100);
 }
