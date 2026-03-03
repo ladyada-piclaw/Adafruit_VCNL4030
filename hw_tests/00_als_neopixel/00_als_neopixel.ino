@@ -13,38 +13,15 @@
 #include <Adafruit_VCNL4030.h>
 #include <Wire.h>
 
+#include "hw_test_helpers.h"
+
 #define NEOPIXEL_PIN 6
 #define NEOPIXEL_COUNT 16
 
 Adafruit_VCNL4030 vcnl;
 Adafruit_NeoPixel pixels(NEOPIXEL_COUNT, NEOPIXEL_PIN, NEO_GRB + NEO_KHZ800);
 
-// Get median of 3 readings
-uint16_t medianALS() {
-  uint16_t readings[3];
-  for (uint8_t i = 0; i < 3; i++) {
-    readings[i] = vcnl.readALS();
-    delay(50);
-  }
-  // Simple sort for 3 elements
-  if (readings[0] > readings[1]) {
-    uint16_t t = readings[0];
-    readings[0] = readings[1];
-    readings[1] = t;
-  }
-  if (readings[1] > readings[2]) {
-    uint16_t t = readings[1];
-    readings[1] = readings[2];
-    readings[2] = t;
-  }
-  if (readings[0] > readings[1]) {
-    uint16_t t = readings[0];
-    readings[0] = readings[1];
-    readings[1] = t;
-  }
-  return readings[1];
-}
-
+// medianLux returns float, not covered by shared helper
 float medianLux() {
   float readings[3];
   for (uint8_t i = 0; i < 3; i++) {
@@ -63,30 +40,6 @@ float medianLux() {
   }
   if (readings[0] > readings[1]) {
     float t = readings[0];
-    readings[0] = readings[1];
-    readings[1] = t;
-  }
-  return readings[1];
-}
-
-uint16_t medianWhite() {
-  uint16_t readings[3];
-  for (uint8_t i = 0; i < 3; i++) {
-    readings[i] = vcnl.readWhite();
-    delay(50);
-  }
-  if (readings[0] > readings[1]) {
-    uint16_t t = readings[0];
-    readings[0] = readings[1];
-    readings[1] = t;
-  }
-  if (readings[1] > readings[2]) {
-    uint16_t t = readings[1];
-    readings[1] = readings[2];
-    readings[2] = t;
-  }
-  if (readings[0] > readings[1]) {
-    uint16_t t = readings[0];
     readings[0] = readings[1];
     readings[1] = t;
   }
@@ -133,13 +86,13 @@ void setup() {
   Serial.println(F("--- Test 1: ALS raw value ---"));
   setAllPixels(0, 0, 0);
   delay(300);
-  uint16_t alsOff = medianALS();
+  uint16_t alsOff = medianRead(vcnl, READ_ALS);
   Serial.print(F("  ALS OFF: "));
   Serial.println(alsOff);
 
   setAllPixels(255, 255, 255);
   delay(300);
-  uint16_t alsOn = medianALS();
+  uint16_t alsOn = medianRead(vcnl, READ_ALS);
   Serial.print(F("  ALS ON:  "));
   Serial.println(alsOn);
 
@@ -177,13 +130,13 @@ void setup() {
   Serial.println(F("--- Test 3: White channel ---"));
   setAllPixels(0, 0, 0);
   delay(300);
-  uint16_t whiteOff = medianWhite();
+  uint16_t whiteOff = medianRead(vcnl, READ_WHITE);
   Serial.print(F("  White OFF: "));
   Serial.println(whiteOff);
 
   setAllPixels(255, 255, 255);
   delay(300);
-  uint16_t whiteOn = medianWhite();
+  uint16_t whiteOn = medianRead(vcnl, READ_WHITE);
   Serial.print(F("  White ON:  "));
   Serial.println(whiteOn);
 

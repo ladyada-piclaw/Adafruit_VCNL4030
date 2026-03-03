@@ -13,36 +13,14 @@
 #include <Servo.h>
 #include <Wire.h>
 
+#include "hw_test_helpers.h"
+
 #define SERVO_PIN 4
 #define CLOSE_POS 90 // Reliable high-reading position
 #define FAR_POS 180  // Safe return position
 
 Adafruit_VCNL4030 vcnl;
 Servo servo;
-
-uint16_t medianProximity() {
-  uint16_t readings[3];
-  for (uint8_t i = 0; i < 3; i++) {
-    readings[i] = vcnl.readProximity();
-    delay(50);
-  }
-  if (readings[0] > readings[1]) {
-    uint16_t t = readings[0];
-    readings[0] = readings[1];
-    readings[1] = t;
-  }
-  if (readings[1] > readings[2]) {
-    uint16_t t = readings[1];
-    readings[1] = readings[2];
-    readings[2] = t;
-  }
-  if (readings[0] > readings[1]) {
-    uint16_t t = readings[0];
-    readings[0] = readings[1];
-    readings[1] = t;
-  }
-  return readings[1];
-}
 
 void setup() {
   Serial.begin(115200);
@@ -78,7 +56,7 @@ void setup() {
   Serial.println(F("--- 12-bit mode (PS_HD=0) ---"));
   vcnl.setProxResolution16Bit(false);
   delay(100);
-  uint16_t ps12bit = medianProximity();
+  uint16_t ps12bit = medianRead(vcnl, READ_PROX);
   Serial.print(F("  Reading: "));
   Serial.println(ps12bit);
   Serial.print(F("  Max theoretical: 4095"));
@@ -92,7 +70,7 @@ void setup() {
   Serial.println(F("--- 16-bit mode (PS_HD=1) ---"));
   vcnl.setProxResolution16Bit(true);
   delay(100);
-  uint16_t ps16bit = medianProximity();
+  uint16_t ps16bit = medianRead(vcnl, READ_PROX);
   Serial.print(F("  Reading: "));
   Serial.println(ps16bit);
   Serial.print(F("  Max theoretical: 65535"));

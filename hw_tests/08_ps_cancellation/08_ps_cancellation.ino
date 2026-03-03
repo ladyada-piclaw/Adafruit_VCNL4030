@@ -13,36 +13,14 @@
 #include <Servo.h>
 #include <Wire.h>
 
+#include "hw_test_helpers.h"
+
 #define SERVO_PIN 4
 #define TEST_POS 110 // Peak signal position for testing
 #define FAR_POS 180  // Safe return position
 
 Adafruit_VCNL4030 vcnl;
 Servo servo;
-
-uint16_t medianProximity() {
-  uint16_t readings[3];
-  for (uint8_t i = 0; i < 3; i++) {
-    readings[i] = vcnl.readProximity();
-    delay(50);
-  }
-  if (readings[0] > readings[1]) {
-    uint16_t t = readings[0];
-    readings[0] = readings[1];
-    readings[1] = t;
-  }
-  if (readings[1] > readings[2]) {
-    uint16_t t = readings[1];
-    readings[1] = readings[2];
-    readings[2] = t;
-  }
-  if (readings[0] > readings[1]) {
-    uint16_t t = readings[0];
-    readings[0] = readings[1];
-    readings[1] = t;
-  }
-  return readings[1];
-}
 
 void setup() {
   Serial.begin(115200);
@@ -73,7 +51,7 @@ void setup() {
 
   // Read baseline with no cancellation
   Serial.println(F("--- No cancellation ---"));
-  uint16_t baseline = medianProximity();
+  uint16_t baseline = medianRead(vcnl, READ_PROX);
   Serial.print(F("  Baseline reading: "));
   Serial.println(baseline);
 
@@ -85,7 +63,7 @@ void setup() {
   vcnl.setProxCancellation(cancelVal);
   delay(100);
 
-  uint16_t cancelled = medianProximity();
+  uint16_t cancelled = medianRead(vcnl, READ_PROX);
   Serial.print(F("  Cancelled reading: "));
   Serial.println(cancelled);
 

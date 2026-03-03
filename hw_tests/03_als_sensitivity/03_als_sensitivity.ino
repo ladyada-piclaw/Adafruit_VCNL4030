@@ -13,36 +13,15 @@
 #include <Adafruit_VCNL4030.h>
 #include <Wire.h>
 
+#include "hw_test_helpers.h"
+
 #define NEOPIXEL_PIN 6
 #define NEOPIXEL_COUNT 16
 
 Adafruit_VCNL4030 vcnl;
 Adafruit_NeoPixel pixels(NEOPIXEL_COUNT, NEOPIXEL_PIN, NEO_GRB + NEO_KHZ800);
 
-uint16_t medianALS() {
-  uint16_t readings[3];
-  for (uint8_t i = 0; i < 3; i++) {
-    readings[i] = vcnl.readALS();
-    delay(50);
-  }
-  if (readings[0] > readings[1]) {
-    uint16_t t = readings[0];
-    readings[0] = readings[1];
-    readings[1] = t;
-  }
-  if (readings[1] > readings[2]) {
-    uint16_t t = readings[1];
-    readings[1] = readings[2];
-    readings[2] = t;
-  }
-  if (readings[0] > readings[1]) {
-    uint16_t t = readings[0];
-    readings[0] = readings[1];
-    readings[1] = t;
-  }
-  return readings[1];
-}
-
+// medianLux returns float, not covered by shared helper
 float medianLux() {
   float readings[3];
   for (uint8_t i = 0; i < 3; i++) {
@@ -104,7 +83,7 @@ void setup() {
   vcnl.setALSHighDynamicRange(false);
   vcnl.setALSLowSensitivity(false);
   delay(200);
-  uint16_t raw1 = medianALS();
+  uint16_t raw1 = medianRead(vcnl, READ_ALS);
   float lux1 = medianLux();
   Serial.print(F("  Raw: "));
   Serial.print(raw1);
@@ -116,7 +95,7 @@ void setup() {
   vcnl.setALSHighDynamicRange(true);
   vcnl.setALSLowSensitivity(false);
   delay(200);
-  uint16_t raw2 = medianALS();
+  uint16_t raw2 = medianRead(vcnl, READ_ALS);
   float lux2 = medianLux();
   Serial.print(F("  Raw: "));
   Serial.print(raw2);
@@ -128,7 +107,7 @@ void setup() {
   vcnl.setALSHighDynamicRange(false);
   vcnl.setALSLowSensitivity(true);
   delay(200);
-  uint16_t raw3 = medianALS();
+  uint16_t raw3 = medianRead(vcnl, READ_ALS);
   float lux3 = medianLux();
   Serial.print(F("  Raw: "));
   Serial.print(raw3);
